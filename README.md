@@ -1,6 +1,8 @@
 # ELO_BFTD
 
-Source code for the ELO system at Battle for the Den, which merges results from Challonge and Smash.gg
+Source code for the ranking system used at WolfTV, which merges results from Challonge and Smash.gg
+
+The ranking system is based on Microsoft's TrueSkill™ approach, and was implemented thanks to the `trueskill` module by Heungsub Lee. As such, this cannot be used for commercial projects.
 
 ## How to run the main script
 
