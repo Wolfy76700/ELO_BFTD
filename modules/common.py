@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 def calculate_power_points(player_database):
-    ratio = 1
+    ratio = 10
     for player_name in player_database.keys():
         mu_value = player_database[player_name].get("rating_mu")
         player_database[player_name]["power_points"] = int(mu_value*ratio)
