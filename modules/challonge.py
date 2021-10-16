@@ -1,4 +1,4 @@
-import trueskill
+import elo
 import json
 from urllib.parse import urlencode
 from urllib.request import Request, HTTPBasicAuthHandler, build_opener
@@ -71,7 +71,7 @@ def get_challonge_tournament_id(main_url, subdomain=None):
             return(element.get("tournament").get("id"))
 
 
-def calculate_trueskill_for_challonge_tournament(tournament_dict, player_database={}):
+def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
     subdomain = tournament_dict.get("subdomain")
     main_url = tournament_dict.get("main_url")
     tournament_id = get_challonge_tournament_id(main_url, subdomain)
@@ -99,12 +99,11 @@ def calculate_trueskill_for_challonge_tournament(tournament_dict, player_databas
 
             id_to_name_dict[participant_dict.get("id")] = player_name
 
-            previous_rating_mu, previous_rating_sigma, previous_match_count = common.get_previous_rating(
+            previous_rating_mu, previous_match_count = common.get_previous_rating(
                 player_name, player_database)
 
             player_database[player_name] = {
                 "rating_mu": previous_rating_mu,
-                "rating_sigma": previous_rating_sigma,
                 "match_count": previous_match_count
             }
 
@@ -122,39 +121,35 @@ def calculate_trueskill_for_challonge_tournament(tournament_dict, player_databas
         player_1_name = id_to_name_dict.get(match_dict.get("player1_id"))
         player_2_name = id_to_name_dict.get(match_dict.get("player2_id"))
         if player_1_name and player_2_name:
-            rating_1 = trueskill.Rating(mu=player_database.get(player_1_name).get(
-                "rating_mu"), sigma=player_database.get(player_1_name).get("rating_sigma"))
-            rating_2 = trueskill.Rating(mu=player_database.get(player_2_name).get(
-                "rating_mu"), sigma=player_database.get(player_1_name).get("rating_sigma"))
+            rating_1 = player_database.get(player_1_name).get("rating_mu")
+            rating_2 = player_database.get(player_2_name).get("rating_mu")
             if match_dict.get("winner_id") == match_dict.get("player1_id"):
                 if match_dict.get("scores_csv") and match_dict.get("scores_csv") != "0-0":
                     score = match_dict.get("scores_csv").split("-")
                     for i in range(int(score[1])):
-                        rating_2, rating_1 = trueskill.rate_1vs1(
+                        rating_2, rating_1 = elo.rate_1vs1(
                             rating_2, rating_1)
                     for i in range(int(score[0])):
-                        rating_1, rating_2 = trueskill.rate_1vs1(
+                        rating_1, rating_2 = elo.rate_1vs1(
                             rating_1, rating_2)
                 else:
-                    rating_1, rating_2 = trueskill.rate_1vs1(rating_1, rating_2)
+                    rating_1, rating_2 = elo.rate_1vs1(rating_1, rating_2)
             elif match_dict.get("winner_id") == match_dict.get("player2_id"):
                 if match_dict.get("scores_csv") and match_dict.get("scores_csv") != "0-0":
                     score = match_dict.get("scores_csv").split("-")
                     for i in range(int(score[0])):
-                        rating_1, rating_2 = trueskill.rate_1vs1(
+                        rating_1, rating_2 = elo.rate_1vs1(
                             rating_1, rating_2)
                     for i in range(int(score[1])):
-                        rating_2, rating_1 = trueskill.rate_1vs1(
+                        rating_2, rating_1 = elo.rate_1vs1(
                             rating_2, rating_1)
                 else:
-                    rating_2, rating_1 = trueskill.rate_1vs1(rating_2, rating_1)
+                    rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
             player_database[player_1_name] = {
-                "rating_mu": rating_1.mu,
-                "rating_sigma": rating_1.sigma,
+                "rating_mu": rating_1,
                 "match_count": player_database[player_1_name].get("match_count")+1
             }
             player_database[player_2_name] = {
-                "rating_mu": rating_2.mu,
-                "rating_sigma": rating_2.sigma,
+                "rating_mu": rating_2,
                 "match_count": player_database[player_2_name].get("match_count")+1
             }

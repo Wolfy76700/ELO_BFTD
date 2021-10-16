@@ -18,24 +18,24 @@ def get_ratings_list_from_player_database(player_database):
             ratings_list.append(player_name)
     return(ratings_list)
 
-def calculate_trueskill_for_game(game_dict):
+def calculate_elo_for_game(game_dict):
     player_database = {}
     for tournament_name in game_dict.keys():
         if game_dict[tournament_name].get("type") == "Challonge":
-            challonge.calculate_trueskill_for_challonge_tournament(
+            challonge.calculate_elo_for_challonge_tournament(
                 game_dict[tournament_name], player_database)
         elif game_dict[tournament_name].get("type") == "Smashgg":
-            smashgg.calculate_trueskill_for_smashgg_tournament(game_dict[tournament_name], player_database)
+            smashgg.calculate_elo_for_smashgg_tournament(game_dict[tournament_name], player_database)
     common.remove_players_without_matches(player_database)
     common.calculate_power_points(player_database)
     ranks_list = get_ratings_list_from_player_database(player_database)
     return(player_database, ranks_list)
 
-def calculate_trueskill_for_all_games(tournaments_dict):
+def calculate_elo_for_all_games(tournaments_dict):
     result = {}
     result_summary = '# GENERATED RANKINGS:\n\n'
     for game_name in tournaments_dict.keys():
-        player_database, ranks_list = calculate_trueskill_for_game(tournaments_dict[game_name])
+        player_database, ranks_list = calculate_elo_for_game(tournaments_dict[game_name])
         result[game_name] = {
             "rankings": ranks_list,
             "detail": player_database

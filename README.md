@@ -2,7 +2,7 @@
 
 Source code for the ranking system used at WolfTV, which merges results from Challonge and Smash.gg
 
-The ranking system is based on Microsoft's TrueSkill™ approach, and was implemented thanks to the `trueskill` module by Heungsub Lee. As such, this cannot be used for commercial projects.
+The ranking system is based on the ELO system and was implemented thanks to the `elo` library by sublee. The starting point value is 1500.
 
 ## How to run the main script
 
@@ -10,7 +10,7 @@ The ranking system is based on Microsoft's TrueSkill™ approach, and was implem
 1. Navigate to the root of this git folder
 1. Create a new virtual environment using the command `pipenv install`
 1. Set up the data files (Refer to the next section)
-1. Run the main script using `pipenv run python ./trueskill_bftd.py`
+1. Run the main script using `pipenv run python ./elo_bftd.py`
 
 ## Useful data files
 

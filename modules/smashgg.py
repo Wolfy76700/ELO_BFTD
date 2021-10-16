@@ -1,5 +1,5 @@
 import requests
-import trueskill
+import elo
 import json
 from datetime import datetime
 from modules import common as common
@@ -41,12 +41,11 @@ def get_player_list_from_group(group, id_to_name_dict={}, player_database={}):
 
             id_to_name_dict[entrant.get("id")] = pr_name
 
-            previous_rating_mu, previous_rating_sigma, previous_match_count = common.get_previous_rating(
+            previous_rating_mu, previous_match_count = common.get_previous_rating(
                 pr_name, player_database)
 
             player_database[pr_name] = {
                 "rating_mu": previous_rating_mu,
-                "rating_sigma": previous_rating_sigma,
                 "match_count": previous_match_count
             }
 
@@ -68,7 +67,7 @@ def order_smashgg_group_matches_by_date(smashgg_group_list):
     return(ordered_list)
 
 
-def calculate_trueskill_per_group(group, id_to_name_dict, player_database):
+def calculate_elo_per_group(group, id_to_name_dict, player_database):
     group_id = group.get("id")
     group_request_url = f'phase_group/{group_id}?expand[]=sets'
     group_request_data = get_smashgg(group_request_url)
@@ -82,51 +81,45 @@ def calculate_trueskill_per_group(group, id_to_name_dict, player_database):
             player_1_score = match_dict.get("entrant1Score")
             player_2_score = match_dict.get("entrant2score")
             if player_1_name and player_2_name and player_1_score != -1 and player_2_score != -1 and match_dict.get("winnerId") and match_dict.get("loserId"):
-                rating_1 = trueskill.Rating(mu=player_database.get(player_1_name).get(
-                    "rating_mu"), sigma=player_database.get(player_1_name).get("rating_sigma"))
-                rating_2 = trueskill.Rating(mu=player_database.get(player_2_name).get(
-                    "rating_mu"), sigma=player_database.get(player_1_name).get("rating_sigma"))
+                rating_1 = player_database.get(player_1_name).get("rating_mu")
+                rating_2 = player_database.get(player_2_name).get("rating_mu")
                 if match_dict.get("winnerId") == match_dict.get("entrant1Id"):
                     if player_1_score and player_2_score and [player_1_score, player_2_score] != [0, 0]:
                         for i in range(player_2_score):
-                            rating_2, rating_1 = trueskill.rate_1vs1(
+                            rating_2, rating_1 = elo.rate_1vs1(
                                 rating_2, rating_1)
                         for i in range(player_1_score):
-                            rating_1, rating_2 = trueskill.rate_1vs1(
+                            rating_1, rating_2 = elo.rate_1vs1(
                                 rating_1, rating_2)
                     else:
-                        rating_1, rating_2 = trueskill.rate_1vs1(
+                        rating_1, rating_2 = elo.rate_1vs1(
                             rating_1, rating_2)
                 elif match_dict.get("winnerId") == match_dict.get("entrant2Id"):
                     if player_1_score and player_2_score and [player_1_score, player_2_score] != [0, 0]:
                         for i in range(player_1_score):
-                            rating_1, rating_2 = trueskill.rate_1vs1(
+                            rating_1, rating_2 = elo.rate_1vs1(
                                 rating_1, rating_2)
                         for i in range(player_2_score):
-                            rating_2, rating_1 = trueskill.rate_1vs1(
-                                rating_2, rating_1)
+                            rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
                     else:
-                        rating_2, rating_1 = trueskill.rate_1vs1(
-                            rating_2, rating_1)
+                        rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
                 player_database[player_1_name] = {
-                    "rating_mu": rating_1.mu,
-                    "rating_sigma": rating_1.sigma,
+                    "rating_mu": rating_1,
                     "smashgg_id": match_dict.get("entrant1Id"),
                     "match_count": player_database[player_1_name].get("match_count") + 1
                 }
                 player_database[player_2_name] = {
-                    "rating_mu": rating_2.mu,
-                    "rating_sigma": rating_2.sigma,
+                    "rating_mu": rating_2,
                     "smashgg_id": match_dict.get("entrant2Id"),
                     "match_count": player_database[player_2_name].get("match_count") + 1
                 }
 
 
-def calculate_trueskill_for_smashgg_tournament(tournament_dict, player_database={}):
+def calculate_elo_for_smashgg_tournament(tournament_dict, player_database={}):
     base_url = f'{tournament_dict.get("main_url")}?expand[]=groups'
     tournament_data = get_smashgg(base_url)
     groups = tournament_data.get("entities").get("groups")
     id_to_name_dict = {}
     for group in groups:
         get_player_list_from_group(group, id_to_name_dict, player_database)
-        calculate_trueskill_per_group(group, id_to_name_dict, player_database)
+        calculate_elo_per_group(group, id_to_name_dict, player_database)
