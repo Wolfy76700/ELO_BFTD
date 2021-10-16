@@ -117,6 +117,7 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
         matches_in_tournament_request)
 
     for match in matches_in_tournament_request:
+        dq_detected = False
         match_dict = match.get("match")
         player_1_name = id_to_name_dict.get(match_dict.get("player1_id"))
         player_2_name = id_to_name_dict.get(match_dict.get("player2_id"))
@@ -126,30 +127,37 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
             if match_dict.get("winner_id") == match_dict.get("player1_id"):
                 if match_dict.get("scores_csv") and match_dict.get("scores_csv") != "0-0":
                     score = match_dict.get("scores_csv").split("-")
-                    for i in range(int(score[1])):
-                        rating_2, rating_1 = elo.rate_1vs1(
-                            rating_2, rating_1)
-                    for i in range(int(score[0])):
-                        rating_1, rating_2 = elo.rate_1vs1(
-                            rating_1, rating_2)
+                    if len(score) == 2:
+                        for i in range(int(score[1])):
+                            rating_2, rating_1 = elo.rate_1vs1(
+                                rating_2, rating_1)
+                        for i in range(int(score[0])):
+                            rating_1, rating_2 = elo.rate_1vs1(
+                                rating_1, rating_2)
+                    else:
+                        dq_detected = True
                 else:
                     rating_1, rating_2 = elo.rate_1vs1(rating_1, rating_2)
             elif match_dict.get("winner_id") == match_dict.get("player2_id"):
                 if match_dict.get("scores_csv") and match_dict.get("scores_csv") != "0-0":
                     score = match_dict.get("scores_csv").split("-")
-                    for i in range(int(score[0])):
-                        rating_1, rating_2 = elo.rate_1vs1(
-                            rating_1, rating_2)
-                    for i in range(int(score[1])):
-                        rating_2, rating_1 = elo.rate_1vs1(
-                            rating_2, rating_1)
+                    if len(score) == 2:
+                        for i in range(int(score[0])):
+                            rating_1, rating_2 = elo.rate_1vs1(
+                                rating_1, rating_2)
+                        for i in range(int(score[1])):
+                            rating_2, rating_1 = elo.rate_1vs1(
+                                rating_2, rating_1)
+                    else:
+                        dq_detected = True
                 else:
                     rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
-            player_database[player_1_name] = {
-                "rating_mu": rating_1,
-                "match_count": player_database[player_1_name].get("match_count")+1
-            }
-            player_database[player_2_name] = {
-                "rating_mu": rating_2,
-                "match_count": player_database[player_2_name].get("match_count")+1
-            }
+            if not dq_detected:
+                player_database[player_1_name] = {
+                    "rating_mu": rating_1,
+                    "match_count": player_database[player_1_name].get("match_count")+1
+                }
+                player_database[player_2_name] = {
+                    "rating_mu": rating_2,
+                    "match_count": player_database[player_2_name].get("match_count")+1
+                }
