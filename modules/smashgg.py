@@ -100,7 +100,8 @@ def calculate_elo_per_group(group, id_to_name_dict, player_database):
                             rating_1, rating_2 = elo.rate_1vs1(
                                 rating_1, rating_2)
                         for i in range(player_2_score):
-                            rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
+                            rating_2, rating_1 = elo.rate_1vs1(
+                                rating_2, rating_1)
                     else:
                         rating_2, rating_1 = elo.rate_1vs1(rating_2, rating_1)
                 player_database[player_1_name] = {

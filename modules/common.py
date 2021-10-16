@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def calculate_power_points(player_database):
     ratio = 10
     for player_name in player_database.keys():
@@ -18,6 +19,7 @@ def get_previous_rating(player_name, player_database):
         previous_match_count = 0
 
     return(previous_rating_mu, previous_match_count)
+
 
 def remove_players_without_matches(player_database):
     og_dict = deepcopy(player_database)
