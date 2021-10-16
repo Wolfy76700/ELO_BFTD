@@ -23,6 +23,7 @@ def get_ratings_list_from_player_database(player_database):
 def calculate_elo_for_game(game_dict):
     player_database = {}
     for tournament_name in game_dict.keys():
+        print(tournament_name)
         if game_dict[tournament_name].get("type") == "Challonge":
             challonge.calculate_elo_for_challonge_tournament(
                 game_dict[tournament_name], player_database)
