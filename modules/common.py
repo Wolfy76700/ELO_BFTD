@@ -15,7 +15,7 @@ def get_previous_rating(player_name, player_database):
             "match_count")
 
     else:
-        previous_rating_mu = 1500
+        previous_rating_mu = 1200
         previous_match_count = 0
 
     return(previous_rating_mu, previous_match_count)

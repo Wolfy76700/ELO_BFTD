@@ -2,7 +2,7 @@
 
 Source code for the ranking system used at WolfTV, which merges results from Challonge and Smash.gg
 
-The ranking system is based on the ELO system and was implemented thanks to the `elo` library by sublee. The starting point value is 1500.
+The ranking system is based on the ELO system and was implemented thanks to the `elo` library by sublee. The starting point value is 1200.
 
 ## How to run the main script
 
