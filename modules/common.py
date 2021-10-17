@@ -1,4 +1,5 @@
 from copy import deepcopy
+from numpy import log
 
 
 def calculate_power_points(player_database):
@@ -26,3 +27,9 @@ def remove_players_without_matches(player_database):
     for player_name in og_dict.keys():
         if player_database[player_name].get("match_count") == 0:
             del player_database[player_name]
+
+def adjust_elo_for_tournament_win(elo, number_participants, ranking=1):
+    ratio = 100
+    adjust_factor = log(number_participants)/(ratio*ranking)
+    new_elo = elo*(1+adjust_factor)
+    return(new_elo)

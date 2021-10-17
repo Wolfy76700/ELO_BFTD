@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, HTTPBasicAuthHandler, build_opener
 from datetime import datetime
 from modules import common as common
+from copy import deepcopy
 
 data_folder = "data"
 
@@ -70,6 +71,16 @@ def get_challonge_tournament_id(main_url, subdomain=None):
         if element.get("tournament").get("url") == main_url:
             return(element.get("tournament").get("id"))
 
+def apply_bonus_based_on_placings(players_in_tournament, id_to_name_dict, player_database):
+    number_participants = len(id_to_name_dict)
+    for participant in players_in_tournament:
+        participant_dict = participant.get("participant")
+        if participant_dict.get("id") in id_to_name_dict.keys():
+            placement = participant_dict.get("final_rank")
+            player_name = id_to_name_dict[participant_dict.get("id")]
+            if placement:
+                player_database[player_name]["rating_mu"] = common.adjust_elo_for_tournament_win(player_database[player_name]["rating_mu"], number_participants, ranking=int(placement))  # Bonus for placing in the tourney
+
 
 def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
     subdomain = tournament_dict.get("subdomain")
@@ -104,7 +115,8 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
 
             player_database[player_name] = {
                 "rating_mu": previous_rating_mu,
-                "match_count": previous_match_count
+                "match_count": previous_match_count,
+                "match_count_current": 0
             }
 
     if subdomain:
@@ -155,9 +167,23 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
             if not dq_detected:
                 player_database[player_1_name] = {
                     "rating_mu": rating_1,
-                    "match_count": player_database[player_1_name].get("match_count")+1
+                    "match_count": player_database[player_1_name].get("match_count")+1,
+                    "match_count_current": player_database[player_1_name].get("match_count_current")+1
                 }
                 player_database[player_2_name] = {
                     "rating_mu": rating_2,
-                    "match_count": player_database[player_2_name].get("match_count")+1
+                    "match_count": player_database[player_2_name].get("match_count")+1,
+                    "match_count_current": player_database[player_1_name].get("match_count_current")+1
                 }
+
+    for player_name in player_database.keys():
+        if player_database[player_name].get("match_count_current"):
+            if player_database[player_name].get("match_count_current") == 0:
+                id_to_name_dict_bak = deepcopy(id_to_name_dict)
+                for id in id_to_name_dict_bak.keys():
+                    if id_to_name_dict_bak[id] == player_name:
+                        del id_to_name_dict[id]
+            del player_database[player_name]["match_count_current"]
+
+    if id_to_name_dict:
+        apply_bonus_based_on_placings(players_in_tournament_request, id_to_name_dict, player_database)
