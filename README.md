@@ -4,7 +4,7 @@ Source code for the ranking system used at WolfTV, which merges results from Cha
 
 The ranking system is based on the ELO system and was implemented thanks to the `elo` library by sublee. The starting point value is 1200.
 
-ELO is boosted once a tournament finishes based on your final rank in the tournament and the number of participants in that tournament. The formula for the ELO boost is `new_elo = old_elo + (2 * ln(nb_participants)/final_rank)`
+ELO is boosted once a tournament finishes based on your final rank in the tournament and the number of participants in that tournament. The formula for the ELO boost is `new_elo = old_elo + (2 * ln(nb_participants) / final_rank) + (2 * ln(nb_participants) / 3)`
 
 ## How to run the main script
 

@@ -31,5 +31,6 @@ def remove_players_without_matches(player_database):
 def adjust_elo_for_tournament_win(elo, number_participants, ranking=1):
     ratio = 2
     adjust_factor = log(number_participants)/ranking
-    new_elo = elo+(adjust_factor*ratio)
+    participation_factor = log(number_participants)/3
+    new_elo = elo+((adjust_factor+participation_factor)*ratio)
     return(new_elo)
