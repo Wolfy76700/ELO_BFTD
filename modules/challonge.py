@@ -98,6 +98,9 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
 
     for participant in players_in_tournament_request:
         participant_dict = participant.get("participant")
+        
+        # print(participant_dict.get("name"))
+        
         if participant_dict.get("checked_in"):
             main_name = None
             for key in alt_names.keys():
