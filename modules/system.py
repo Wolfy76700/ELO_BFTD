@@ -1,7 +1,8 @@
 from modules import challonge as challonge
 from modules import smashgg as smashgg
 from modules import common as common
-
+import pykakasi
+import unicodedata
 
 def get_ratings_list_from_player_database(player_database):
     ratings_list = []
@@ -35,10 +36,33 @@ def calculate_elo_for_game(game_dict):
     ranks_list = get_ratings_list_from_player_database(player_database)
     return(player_database, ranks_list)
 
+def convert_markdownextra_table_to_csv(markdownextra_table):
+    csv_table = ''
+    for line in markdownextra_table.splitlines():
+        if ":---:" not in line:
+            csv_table = csv_table + line.replace(" | ", ',').replace("\|", '|') + "\n"
+    return (csv_table)
 
-def calculate_elo_for_all_games(tournaments_dict):
+def convert_name_to_romaji(name):
+    japanese_detected = False
+    for character in name:
+        character_name = unicodedata.name(character)
+        if ("HIRAGANA LETTER" in character_name) or ("KATAKANA LETTER" in character_name):
+            japanese_detected = True
+
+    if japanese_detected:
+        kks = pykakasi.kakasi()
+        conversions = kks.convert(name)
+        romaji = ''
+        for item in conversions:
+            romaji = romaji + item.get('hepburn').capitalize()
+        return(romaji)
+    else:
+        return(name)
+
+def calculate_elo_for_all_games(tournaments_dict, csv_save_folder=None):
     result = {}
-    result_summary = '# GENERATED RANKINGS:\n\n'
+    result_summary = '# GENERATED RANKINGS\n\n'
     for game_name in tournaments_dict.keys():
         player_database, ranks_list = calculate_elo_for_game(
             tournaments_dict[game_name])
@@ -48,11 +72,20 @@ def calculate_elo_for_all_games(tournaments_dict):
         }
         result_summary = result_summary + \
             f"## RANKINGS FOR {game_name.upper()}\n\n"
+        result_table_markdownextra = "Rank | Player | Power Points\n:---: | :----: | :----:\n"
         for index in range(len(ranks_list)):
             player_name = ranks_list[index]
-            result_summary = result_summary + \
-                f"{index+1}. {player_name} (Power points: {player_database[player_name].get('power_points')})  \n"
+            player_name_latin = convert_name_to_romaji(player_name)
+            player_name_escape = player_name_latin.replace('|', '\|')
+            result_table_markdownextra = result_table_markdownextra + \
+                f"{index+1} | {player_name_escape} | {player_database[player_name].get('power_points')}\n"
 
+        if csv_save_folder:
+            csv_table = convert_markdownextra_table_to_csv(result_table_markdownextra)
+            with open(f"{csv_save_folder}/result_{game_name}.csv", 'wt', encoding='utf-8') as csv_table_file:
+                csv_table_file.write(csv_table)
+
+        result_summary = result_summary + result_table_markdownextra
         result_summary = result_summary + '\n'
 
     result_summary = result_summary.strip()

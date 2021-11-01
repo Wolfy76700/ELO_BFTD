@@ -8,6 +8,7 @@ requests = "*"
 markdown = "*"
 elo = "*"
 numpy = "*"
+pykakasi = "*"
 
 [dev-packages]
 autopep8 = "*"
