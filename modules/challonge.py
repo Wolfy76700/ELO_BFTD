@@ -25,7 +25,15 @@ def order_challonge_tournament_matches_by_date(matches_request_list):
         if ordered_list:
             for i in range(len(ordered_list)):
                 added = False
-                if datetime.fromisoformat(match.get("match").get("updated_at")) > datetime.fromisoformat(ordered_list[i].get("match").get("updated_at")):
+                try:
+                    updated_at_current = datetime.fromisoformat(match.get("match").get("updated_at"))
+                except ValueError:
+                    updated_at_current = datetime.fromisoformat(match.get("match").get("updated_at").rstrip('Z'))
+                try:
+                    updated_at_from_list = datetime.fromisoformat(ordered_list[i].get("match").get("updated_at"))
+                except ValueError:
+                    updated_at_from_list = datetime.fromisoformat(ordered_list[i].get("match").get("updated_at").rstrip('Z'))
+                if updated_at_current > updated_at_from_list:
                     ordered_list.insert(i, match)
                     added = True
                     break
