@@ -186,6 +186,19 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
                     "match_count": player_database[player_2_name].get("match_count")+1,
                     "match_count_current": player_database[player_1_name].get("match_count_current")+1
                 }
+            else:
+                if match_dict.get("winner_id") == match_dict.get("player2_id"):
+                    player_database[player_1_name] = {
+                        "rating_mu": rating_1-(rating_1*5/100),
+                        "match_count": player_database[player_1_name].get("match_count"),
+                        "match_count_current": player_database[player_1_name].get("match_count_current")
+                    }
+                else:
+                    player_database[player_2_name] = {
+                        "rating_mu": rating_2-(rating_2*5/100),
+                        "match_count": player_database[player_2_name].get("match_count"),
+                        "match_count_current": player_database[player_2_name].get("match_count_current")
+                    }
 
     for player_name in player_database.keys():
         if player_database[player_name].get("match_count_current"):
