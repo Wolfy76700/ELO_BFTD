@@ -5,6 +5,7 @@ from urllib.request import Request, HTTPBasicAuthHandler, build_opener
 from datetime import datetime
 from modules import common as common
 from copy import deepcopy
+import os
 
 data_folder = "data"
 
@@ -33,7 +34,7 @@ def order_challonge_tournament_matches_by_date(matches_request_list):
                     updated_at_from_list = datetime.fromisoformat(ordered_list[i].get("match").get("updated_at"))
                 except ValueError:
                     updated_at_from_list = datetime.fromisoformat(ordered_list[i].get("match").get("updated_at").rstrip('Z'))
-                if updated_at_current > updated_at_from_list:
+                if updated_at_current < updated_at_from_list:
                     ordered_list.insert(i, match)
                     added = True
                     break
@@ -139,6 +140,10 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
     matches_in_tournament_request = order_challonge_tournament_matches_by_date(
         matches_in_tournament_request)
 
+    # with open("result/test.json", 'wt') as test:
+    #     test.write(json.dumps(matches_in_tournament_request))
+    # os.system("pause")
+
     for match in matches_in_tournament_request:
         dq_detected = False
         match_dict = match.get("match")
@@ -187,13 +192,13 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
                     "match_count_current": player_database[player_1_name].get("match_count_current")+1
                 }
             else:
-                if match_dict.get("winner_id") == match_dict.get("player2_id"):
+                if match_dict.get("winner_id") == match_dict.get("player2_id") and player_database[player_1_name].get("match_count") > 0:
                     player_database[player_1_name] = {
                         "rating_mu": rating_1-(rating_1*2/100),
                         "match_count": player_database[player_1_name].get("match_count"),
                         "match_count_current": player_database[player_1_name].get("match_count_current")
                     }
-                else:
+                elif match_dict.get("winner_id") == match_dict.get("player1_id") and player_database[player_2_name].get("match_count") > 0:
                     player_database[player_2_name] = {
                         "rating_mu": rating_2-(rating_2*2/100),
                         "match_count": player_database[player_2_name].get("match_count"),

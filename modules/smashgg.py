@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from modules import common as common
 from copy import deepcopy
+import os
 
 legacy_smashgg_api = "https://api.smash.gg/"
 
@@ -58,7 +59,7 @@ def order_smashgg_group_matches_by_date(smashgg_group_list):
         if ordered_list:
             for i in range(len(ordered_list)):
                 added = False
-                if match.get("updatedAtMicro") > ordered_list[i].get("updatedAtMicro"):
+                if match.get("updatedAtMicro") < ordered_list[i].get("updatedAtMicro"):
                     ordered_list.insert(i, match)
                     added = True
                     break
@@ -75,6 +76,10 @@ def calculate_elo_per_group(group, id_to_name_dict, player_database):
     group_request_data = get_smashgg(group_request_url)
     sets = group_request_data.get("entities").get("sets")
     sets = order_smashgg_group_matches_by_date(sets)
+
+    # with open("result/test.json", 'wt') as test:
+    #     test.write(json.dumps(sets))
+    # os.system("pause")
 
     for match_dict in sets:
         if match_dict.get("entrant1Id") and match_dict.get("entrant2Id"):
