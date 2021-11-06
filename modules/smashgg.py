@@ -9,7 +9,7 @@ legacy_smashgg_api = "https://api.smash.gg/"
 
 data_folder = "data"
 
-with open(f"{data_folder}/challonge_to_smashgg.json", 'rt') as challonge_names_file:
+with open(f"{data_folder}/challonge_to_smashgg.json", 'rt', encoding="utf-8") as challonge_names_file:
     challonge_names = json.loads(challonge_names_file.read())
 
 

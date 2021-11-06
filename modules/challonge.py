@@ -13,7 +13,7 @@ with open(f"{data_folder}/_challonge_api_key.txt", 'rt') as challonge_key_file:
     challonge_username = challonge_key_file_contents[0]
     challonge_api_key = challonge_key_file_contents[1]
 
-with open(f"{data_folder}/challonge_to_smashgg.json", 'rt') as challonge_names_file:
+with open(f"{data_folder}/challonge_to_smashgg.json", 'rt', encoding="utf-8") as challonge_names_file:
     alt_names = json.loads(challonge_names_file.read())
 
 challonge_tournament_list_url = "https://api.challonge.com/v1/tournaments.json"
