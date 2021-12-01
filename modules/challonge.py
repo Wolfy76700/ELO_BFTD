@@ -140,7 +140,7 @@ def calculate_elo_for_challonge_tournament(tournament_dict, player_database={}):
     matches_in_tournament_request = order_challonge_tournament_matches_by_date(
         matches_in_tournament_request)
 
-    # with open("result/test.json", 'wt') as test:
+    # with open(f"result/test_{main_url}.json", 'wt') as test:
     #     test.write(json.dumps(matches_in_tournament_request))
     # os.system("pause")
 
