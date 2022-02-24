@@ -16,7 +16,7 @@ ELO is boosted once a tournament finishes based on your final rank in the tourna
 
 ## Useful data files
 
-In order to use the `trueskill_bftd.py` script and its associated modules, you will need to add a few files in the `data` folder
+In order to use the `elo_bftd.py` script and its associated modules, you will need to add a few files in the `data` folder
 
 ### `data/_challonge_api_key.txt`
 
